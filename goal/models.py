@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from tag.models import Tag
-from django.contrib.postgres.fields import ArrayField
 
 # Create your models here.
 
@@ -27,12 +26,7 @@ class Goal(models.Model):
     is_scheduled = models.BooleanField(default=False, blank=True)
     is_completed = models.BooleanField(default=False, blank=True)
 
-    avaliable_days = ArrayField(
-        models.IntegerField(default=1), size=7, null=True, blank=True
-    )
-    exception_list = ArrayField(
-        models.DateField(), size=30, null=True, blank=True
-    )  # 일단 30으로 제한함.
+
 
     def __str__(self):
         return self.title
