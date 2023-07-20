@@ -17,11 +17,13 @@ from .serializers import TodoSerializer
 
 class TodoList(APIView):
     def post(self, request):
+        if not request.user.is_authenticated:
+            return Response("로그인이 필요합니다.", status=status.HTTP_401_UNAUTHORIZED)
         title = request.data.get("title", None)
         is_completed = request.data.get("is_completed", None)
         goal_id = request.data.get("goal_id", None)
 
-        if not title or not is_completed or not goal_id:
+        if title == None or is_completed == None or goal_id == None:
             return Response("필수 입력값이 없습니다.", status=status.HTTP_400_BAD_REQUEST)
 
         todo = Todo.objects.create(
@@ -30,7 +32,19 @@ class TodoList(APIView):
         serializer = TodoSerializer(todo)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request):
+
+class TodoDetail(APIView):
+    def patch(self, request, todo_id):
+        if not request.user.is_authenticated:
+            return Response("로그인이 필요합니다.", status=status.HTTP_401_UNAUTHORIZED)
+        todo = Todo.objects.get(id=todo_id)
+        serializer = TodoSerializer(todo, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, todo_id):
         todo_id = request.query_params.get("todo_id", None)
         todo = Todo.objects.get(id=todo_id)
         todo.delete()
