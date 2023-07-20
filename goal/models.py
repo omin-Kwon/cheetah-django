@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from tag.models import Tag
-from django.contrib.postgres.fields import ArrayField
-
 # Create your models here.
 
 
@@ -27,12 +25,25 @@ class Goal(models.Model):
     is_scheduled = models.BooleanField(default=False, blank=True)
     is_completed = models.BooleanField(default=False, blank=True)
 
-    avaliable_days = ArrayField(
-        models.IntegerField(default=1), size=7, null=True, blank=True
-    )
-    exception_list = ArrayField(
-        models.DateField(), size=30, null=True, blank=True
-    )  # 일단 30으로 제한함.
-
     def __str__(self):
         return self.title
+
+class AvailableDays(models.Model): #월화수목금토일 중 언제 가능한지 알려주는 테이블
+    goal = models.OneToOneField(Goal, on_delete=models.CASCADE, null=False)
+    monday = models.BooleanField(default=True)
+    tuesday = models.BooleanField(default=True)
+    wednesday = models.BooleanField(default=True)
+    thursday = models.BooleanField(default=True)
+    friday = models.BooleanField(default=True)
+    saturday = models.BooleanField(default=True)
+    sunday = models.BooleanField(default=True)
+
+class ImpossibleDates(models.Model): #각 목표별로 불가능한 날짜를 알려주는 테이블
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False)
+    date = models.DateField(null=True, blank=True)
+
+class DailyHourOfGoals(models.Model): #각 유저가 목표별로 특정 날짜에 얼마만큼 공부를 했는지 알려주는 테이블
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False)
+    hour = models.FloatField()
+    date = models.DateField()
