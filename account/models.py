@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+import uuid
 import sys
 import os
 import hashlib
@@ -17,6 +18,9 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from key import NCLOUD_ACCESS_KEY, NCLOUD_SECRET_KEY, SERVICE_ID, SEND_PHONE_NUM
 
 # Create your models here.
+
+# class CustomUser(AbstractUser):
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

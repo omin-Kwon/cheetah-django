@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
-from datetime import timedelta
+from datetime import timedelta, date
 
 
 
@@ -162,15 +162,11 @@ class Logout(APIView): #로그아웃
 
 class TokenRefresh(APIView): #액세스 토큰 재발급
     def post(self, request):
-        # authorization_header = request.headers.get('Authorization')
-        # if not authorization_header or not authorization_header.startswith('Bearer '):
-        #     return Response({"detail": "유효한 Authorization 헤더가 필요합니다."}, status=status.HTTP_401_UNAUTHORIZED)
-        
-        # refresh_token = authorization_header.split('Bearer ')[1]
-
         refresh_token = request.data['refresh']
         try:
+            print("hello")
             RefreshToken(refresh_token).verify()
+            print("hi")
         except:
             return Response({"detail" : "로그인 후 다시 시도해주세요."}, status=status.HTTP_401_UNAUTHORIZED)
         new_access_token = str(RefreshToken(refresh_token).access_token)
@@ -179,12 +175,15 @@ class TokenRefresh(APIView): #액세스 토큰 재발급
         return response
     
 class MyPage(APIView): #마이페이지
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response({"detail": "로그인 후 다시 시도해주세요."}, status=status.HTTP_401_UNAUTHORIZED)
+        user_profile = UserProfile.objects.get(user=request.user)
+        return Response(UserProfileSerializer(user_profile).data, status=status.HTTP_200_OK)        
     def patch(self, request):
         if not request.user.is_authenticated:
             return Response({"detail": "로그인 후 다시 시도해주세요."}, status=status.HTTP_401_UNAUTHORIZED)
-        user = User.objects.get(
-            username=request.data['username']
-        )
+        user = request.user
         user_profile = UserProfile.objects.get(user=user)
         try:
             user_profile.max_speed = request.data['max_speed']
