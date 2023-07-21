@@ -28,15 +28,15 @@ class Goal(models.Model):
     def __str__(self):
         return self.title
 
-class AvailableDays(models.Model): #월화수목금토일 중 언제 가능한지 알려주는 테이블
-    goal = models.OneToOneField(Goal, on_delete=models.CASCADE, null=False)
-    monday = models.BooleanField(default=True)
-    tuesday = models.BooleanField(default=True)
-    wednesday = models.BooleanField(default=True)
-    thursday = models.BooleanField(default=True)
-    friday = models.BooleanField(default=True)
-    saturday = models.BooleanField(default=True)
-    sunday = models.BooleanField(default=True)
+# class AvailableDays(models.Model): #월화수목금토일 중 언제 가능한지 알려주는 테이블
+#     goal = models.OneToOneField(Goal, on_delete=models.CASCADE, null=False)
+#     monday = models.BooleanField(default=True)
+#     tuesday = models.BooleanField(default=True)
+#     wednesday = models.BooleanField(default=True)
+#     thursday = models.BooleanField(default=True)
+#     friday = models.BooleanField(default=True)
+#     saturday = models.BooleanField(default=True)
+#     sunday = models.BooleanField(default=True)
 
 class ImpossibleDates(models.Model): #각 목표별로 불가능한 날짜를 알려주는 테이블
     goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False)

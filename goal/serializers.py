@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
 
-from .models import Goal, AvailableDays, ImpossibleDates, DailyHourOfGoals
+from .models import Goal, ImpossibleDates, DailyHourOfGoals
 from todo.serializers import TodoSerializer
 
 class ImpossibleDatesSerializer(ModelSerializer):
@@ -10,16 +10,16 @@ class ImpossibleDatesSerializer(ModelSerializer):
         model = ImpossibleDates
         fields = ["date"]
 
-class AvailableDaysSerializer(ModelSerializer):
-    class Meta:
-        model = AvailableDays
-        fields = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+# class AvailableDaysSerializer(ModelSerializer):
+#     class Meta:
+#         model = AvailableDays
+#         fields = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 
         
 class GoalSerializer(ModelSerializer):
     impossibledates_set = ImpossibleDatesSerializer(many=True, read_only = True)
-    availabledays = AvailableDaysSerializer(required=False)
+    # availabledays = AvailableDaysSerializer(required=False)
     class Meta:
         model = Goal
         fields = "__all__"
@@ -27,7 +27,7 @@ class GoalSerializer(ModelSerializer):
 
 
 class GoalwithTodoSerializer(ModelSerializer):
-    availabledays = AvailableDaysSerializer(required=False)
+    # availabledays = AvailableDaysSerializer(required=False)
     impossibledates_set = ImpossibleDatesSerializer(many=True, read_only = True)
     todo_set = TodoSerializer(many=True, read_only=True)
 
