@@ -18,6 +18,7 @@ from .serializers import (
     GoalSerializer,
     GoalwithTodoSerializer,
     ImpossibleDatesSerializer,
+    DailyHourOfGoalsSerializer
 )
 from rest_framework.exceptions import ParseError
 
@@ -67,6 +68,12 @@ class GoalList(APIView):
         elif month is not None: # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
             goals = goals.filter((Q(start_at__lte=last_day) & Q(finish_at__gte=first_day)))
         # else : #날짜, 요일이 query parameter로 안들어옴. 전체 goal을 전달하는 경우. 내 목표 -> 태그로 필터링되지 않은 전체 goal
+        else:
+            displayed_goals = []
+            for goal in goals:
+                if goal.tag.is_used == True:
+                    displayed_goals.append(goal.id)
+                goals = goals.filter(id__in = displayed_goals)
         serializer = GoalSerializer(goals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -354,3 +361,24 @@ class ImpossibleDatesOfGoal(APIView):
 
         impossibleDate.delete()
         return Response("Deleted successfully.", status=status.HTTP_204_NO_CONTENT)
+
+class GoalHistory(APIView):
+    def get(self, request):
+        month_string = request.query_params.get("month", None) # yyyy-mm
+        try:
+            if month_string:
+                month_string += "-01"
+                month = datetime.strptime(month_string, "%Y-%m-%d").date()
+                print(month)
+                first_day = dt.date(month.year, month.month, 1)
+                _, last_day_num = calendar.monthrange(month.year, month.month)
+                last_day = dt.date(month.year, month.month, last_day_num)
+        except ValueError:
+            raise ParseError(
+                "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
+            )
+        if month is not None: # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
+            dailyHourOfGoals = DailyHourOfGoals.objects.filter(user=request.user)
+            dailyHourOfGoals = dailyHourOfGoals.filter((Q(date__gte=first_day) & Q(date__lte=last_day)))
+        serializer = DailyHourOfGoalsSerializer(dailyHourOfGoals, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

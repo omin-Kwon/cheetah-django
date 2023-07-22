@@ -35,7 +35,6 @@ class GoalwithTodoSerializer(ModelSerializer):
         model = Goal
         fields = "__all__"
 
-
 class DailyHourOfGoalsSerializer(ModelSerializer):
     class Meta:
         model = DailyHourOfGoals

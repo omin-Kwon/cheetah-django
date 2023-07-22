@@ -47,3 +47,5 @@ class DailyHourOfGoals(models.Model): #각 유저가 목표별로 특정 날짜�
     goal = models.ForeignKey(Goal, on_delete=models.CASCADE, null=False)
     hour = models.FloatField()
     date = models.DateField()
+
+
