@@ -45,7 +45,9 @@ class TodoDetail(APIView):
         return Response(serializer.data)
 
     def delete(self, request, todo_id):
-        todo_id = request.query_params.get("todo_id", None)
-        todo = Todo.objects.get(id=todo_id)
+        try:
+            todo = Todo.objects.get(id=todo_id)
+        except Todo.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         todo.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
