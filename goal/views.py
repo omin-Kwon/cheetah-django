@@ -393,6 +393,8 @@ class GoalHistory(APIView):
                 first_day = dt.date(month.year, month.month, 1)
                 _, last_day_num = calendar.monthrange(month.year, month.month)
                 last_day = dt.date(month.year, month.month, last_day_num)
+            else:
+                month = None
         except ValueError:
             raise ParseError(
                 "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
