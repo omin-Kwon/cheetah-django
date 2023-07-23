@@ -1,8 +1,11 @@
+import calendar
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import NotFound, ParseError
+from django.db.models import Q
+
 
 
 from django.db.models import Count
@@ -10,12 +13,12 @@ from tag.models import Tag
 
 import datetime as dt
 from datetime import datetime
-from .models import Goal, AvailableDays, ImpossibleDates, DailyHourOfGoals
+from .models import Goal, ImpossibleDates, DailyHourOfGoals
 from .serializers import (
     GoalSerializer,
     GoalwithTodoSerializer,
-    AvailableDaysSerializer,
     ImpossibleDatesSerializer,
+    DailyHourOfGoalsSerializer
 )
 from rest_framework.exceptions import ParseError
 
@@ -27,43 +30,24 @@ class GoalList(APIView):
                 {"detail": "Authentication credentials not provided"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
-        # tag = request.query_params.get("tag", None)
         date_string = request.query_params.get("date", None)  # yyyy-mm-dd
-        day_num = request.query_params.get(
-            "day", None
-        )  # 0~6 사이 숫자. 0: 월, 1: 화, 2: 수, 3: 목, 4: 금, 5: 토, 6: 일
-
+        month_string = request.query_params.get("month", None) # yyyy-mm
         try:
             if date_string:
                 date = datetime.strptime(date_string, "%Y-%m-%d").date()
             else:
                 date = None
+            if month_string:
+                month_string += "-01"
+                month = datetime.strptime(month_string, "%Y-%m-%d").date()
+                print(month)
+                first_day = dt.date(month.year, month.month, 1)
+                _, last_day_num = calendar.monthrange(month.year, month.month)
+                last_day = dt.date(month.year, month.month, last_day_num)
         except ValueError:
             raise ParseError(
                 "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
             )
-
-        if day_num is not None:
-            try:
-                day_num = int(day_num)
-                days_of_week = [
-                    "monday",
-                    "tuesday",
-                    "wednesday",
-                    "thursday",
-                    "friday",
-                    "saturday",
-                    "sunday",
-                ]
-                day = days_of_week[day_num]
-            except (ValueError, IndexError):
-                raise ParseError(
-                    "Invalid day value. Day should be an integer between 0 and 6."
-                )
-        # if tag is not None:
-        #     goals = Goal.objects.filter(tag=tag, user=request.user)
-        # else:
-        #     goals = Goal.objects.filter(user=request.user)
         goals = Goal.objects.filter(user=request.user)
 
         def is_displayed_on_date(goal):
@@ -73,35 +57,27 @@ class GoalList(APIView):
             finish_at = goal.finish_at
             if start_at > date or finish_at < date:
                 return False
-            if AvailableDays.objects.filter(goal=goal).exists():
-                if (
-                    day is not None
-                    and getattr(AvailableDays.objects.get(goal=goal), str(day)) == False
-                ):
-                    return False
-            else:
-                return False
-            # if ImpossibleDates.objects.filter(goal=goal).exists():
-            #     for impossibledates in ImpossibleDates.objects.filter(goal=goal):
-            #         if impossibledates.date == date:
-            #             return False
             return True
 
-        if (
-            date is not None and day_num is not None
-        ):  # 날짜, 요일이 query parameter로 들어온 경우 -> 요일 상세 -> impossible day로 선택된 날짜라도 리턴함.
+        if date is not None:  # 날짜, 요일이 query parameter로 들어온 경우 -> 요일 상세 -> impossible day로 선택된 날짜라도 리턴함.
             displayed_goals = []
             for goal in goals:
                 if is_displayed_on_date(goal):
                     displayed_goals.append(goal.id)
             goals = goals.filter(id__in=displayed_goals)
-        # else : #날짜, 요일이 query parameter로 안들어옴. 전체 goal을 전달하는 경우. 내 목표, 캘린더 -> 태그로 필터링되지 않은 전체 goal
+        elif month is not None: # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
+            goals = goals.filter((Q(start_at__lte=last_day) & Q(finish_at__gte=first_day)))
+        # else : #날짜, 요일이 query parameter로 안들어옴. 전체 goal을 전달하는 경우. 내 목표 -> 태그로 필터링되지 않은 전체 goal
+        else:
+            displayed_goals = []
+            for goal in goals:
+                if goal.tag.is_used == True:
+                    displayed_goals.append(goal.id)
+                goals = goals.filter(id__in = displayed_goals)
         serializer = GoalSerializer(goals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(
-        self, request
-    ):  # 최초의 목표 추가. 캘린더에도 추가하는 경우 "add_calendar" is not None. 추가된 목표를 캘린더에 추가하는 로직은 GoalDetail에서 구현
+    def post(self, request):  # 최초의 목표 추가. 캘린더에도 추가하는 경우 "add_calendar" is not None. 추가된 목표를 캘린더에 추가하는 로직은 GoalDetail에서 구현
         if not request.user.is_authenticated:
             return Response(
                 {"detail": "Authentication credentials not provided"},
@@ -126,12 +102,11 @@ class GoalList(APIView):
                 finish_at_string = request.data.get("finish_at", None)
                 finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                 is_scheduled = True
-                available_days_list = request.data.get("available_days", None)
                 residual_time = request.data.get("estimated_time", None)
                 estimated_time = request.data.get("estimated_time", None)
                 goal = Goal.objects.create(
                     user=user,
-                    tag_id=tag_id,  # tag_id 입력으로 수정
+                    tag=tag, 
                     title=title,
                     start_at=start_at,
                     finish_at=finish_at,
@@ -141,22 +116,14 @@ class GoalList(APIView):
                     cumulative_time=0,
                     progress_rate=0,
                 )
-                if available_days_list is not None and len(available_days_list) == 7:
-                    AvailableDays.objects.create(
-                        goal=goal,
-                        monday=available_days_list[0],
-                        tuesday=available_days_list[1],
-                        wednesday=available_days_list[2],
-                        thursday=available_days_list[3],
-                        friday=available_days_list[4],
-                        saturday=available_days_list[5],
-                        sunday=available_days_list[6],
-                    )
-                else:
-                    raise ParseError(
-                        f"""{available_days_list}/n
-                        Invalid available_days value. available_days should be a list of length 7."""
-                    )
+                impossible_dates_list = request.data.get("impossible_dates", None)
+                if impossible_dates_list is not None:
+                    for impossible_date in impossible_dates_list:
+                        try:
+                            date = datetime.strptime(impossible_date, "%Y-%m-%d").date()
+                        except ValueError:
+                            raise ParseError("Invalid date format. Use 'YYYY-MM-DD' format.")
+                        ImpossibleDates.objects.create(goal=goal, date = date)
             else:
                 goal = Goal.objects.create(user=user, tag_id=tag_id, title=title)
         except (ValueError, KeyError):
@@ -234,25 +201,17 @@ class GoalDetail(APIView):
                 finish_at_string = request.data.get("finish_at", None)
                 finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                 goal.finish_at = finish_at
-                available_days_list = request.data.get("available_days", None)
-                if available_days_list is not None and len(available_days_list) == 7:
-                    AvailableDays.objects.create(
-                        goal=goal,
-                        monday=available_days_list[0],
-                        tuesday=available_days_list[1],
-                        wednesday=available_days_list[2],
-                        thursday=available_days_list[3],
-                        friday=available_days_list[4],
-                        saturday=available_days_list[5],
-                        sunday=available_days_list[6],
-                    )
-                else:
-                    raise ParseError(
-                        "Invalid available_days value. available_days should be a list of length 7."
-                    )
                 goal.residual_time = request.data.get("estimated_time", None)
                 goal.estimated_time = request.data.get("estimated_time", None)
                 goal.save()
+                impossible_dates_list = request.data.get("impossible_dates", None)
+                if impossible_dates_list is not None:
+                    for impossible_date in impossible_dates_list:
+                        try:
+                            date = datetime.strptime(impossible_date, "%Y-%m-%d").date()
+                        except ValueError:
+                            raise ParseError("Invalid date format. Use 'YYYY-MM-DD' format.")
+                        ImpossibleDates.objects.create(goal=goal, date = date)
             except (ValueError, KeyError):
                 raise ParseError(
                     "Invalid request body. Check your data types and keys."
@@ -285,25 +244,15 @@ class GoalDetail(APIView):
                     goal.progress_rate = request.data.get("progress_rate", None)
                     if goal.progress_rate == 100:
                         goal.is_completed = True
-
-                    available_days_list = request.data.get("available_days", None)
-                    if (
-                        available_days_list is not None
-                        and len(available_days_list) == 7
-                    ):
-                        available_days = AvailableDays.objects.get(goal=goal)
-                        available_days.monday = available_days_list[0]
-                        available_days.tuesday = available_days_list[1]
-                        available_days.wednesday = available_days_list[2]
-                        available_days.thursday = available_days_list[3]
-                        available_days.friday = available_days_list[4]
-                        available_days.saturday = available_days_list[5]
-                        available_days.sunday = available_days_list[6]
-                        available_days.save()
-                    else:
-                        raise ParseError(
-                            "Invalid available_days value. available_days should be a list of length 7."
-                        )
+                    impossible_dates_list = request.data.get("impossible_dates", None)
+                    if impossible_dates_list is not None:
+                        ImpossibleDates.objects.delete(goal=goal)
+                        for impossible_date in impossible_dates_list:
+                            try:
+                                date = datetime.strptime(impossible_date, "%Y-%m-%d").date()
+                            except ValueError:
+                                raise ParseError("Invalid date format. Use 'YYYY-MM-DD' format.")
+                            ImpossibleDates.objects.create(goal=goal, date = date)
                 goal.save()
             except (ValueError, KeyError):
                 raise ParseError(
@@ -325,8 +274,8 @@ class GoalDetail(APIView):
         goal = Goal.objects.get(id=goal_id)
         if calendar_only is not None:
             goal.is_scheduled = False
-            AvailableDays.objects.get(goal=goal).delete()
             DailyHourOfGoals.objects.filter(user=request.user, goal=goal).delete()
+            ImpossibleDates.objects.delete(goal=goal)
         else:
             goal.delete()
         return Response("삭제되었습니다.", status=status.HTTP_204_NO_CONTENT)
@@ -412,3 +361,24 @@ class ImpossibleDatesOfGoal(APIView):
 
         impossibleDate.delete()
         return Response("Deleted successfully.", status=status.HTTP_204_NO_CONTENT)
+
+class GoalHistory(APIView):
+    def get(self, request):
+        month_string = request.query_params.get("month", None) # yyyy-mm
+        try:
+            if month_string:
+                month_string += "-01"
+                month = datetime.strptime(month_string, "%Y-%m-%d").date()
+                print(month)
+                first_day = dt.date(month.year, month.month, 1)
+                _, last_day_num = calendar.monthrange(month.year, month.month)
+                last_day = dt.date(month.year, month.month, last_day_num)
+        except ValueError:
+            raise ParseError(
+                "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
+            )
+        if month is not None: # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
+            dailyHourOfGoals = DailyHourOfGoals.objects.filter(user=request.user)
+            dailyHourOfGoals = dailyHourOfGoals.filter((Q(date__gte=first_day) & Q(date__lte=last_day)))
+        serializer = DailyHourOfGoalsSerializer(dailyHourOfGoals, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
