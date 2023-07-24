@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     "tag",
     "goal",
     "todo",
-    "corsheaders",
 ]
 
 REST_USE_JWT = True

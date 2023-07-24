@@ -33,8 +33,8 @@ def set_token_on_response_cookie(user: User, autologin=False) -> Response:
     user_profile = UserProfile.objects.get(user=user)
     user_profile_serializer = UserProfileSerializer(user_profile)
     res = Response(user_profile_serializer.data, status=status.HTTP_201_CREATED)
-    res.set_cookie("refresh_token", value=str(token), httponly=True)
-    res.set_cookie("access_token", value=str(token.access_token), httponly=True)
+    res.set_cookie("refresh_token", value=str(token))
+    res.set_cookie("access_token", value=str(token.access_token))
     return res
 
 
@@ -97,11 +97,11 @@ class Signup(APIView):  # 회원 가입
         else:
             max_speed = default_max_speed
 
-        if UserProfile.objects.filter(phone_num=phone_num).exists():
-            return Response(
-                {"detail": "해당 전화번호로 가입한 계정이 이미 존재합니다."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # if UserProfile.objects.filter(phone_num=phone_num).exists():
+        #     return Response(
+        #         {"detail": "해당 전화번호로 가입한 계정이 이미 존재합니다."},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
 
         user_serializer = UserSerializer(data=request.data)
         if user_serializer.is_valid(raise_exception=True):
