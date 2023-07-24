@@ -23,7 +23,7 @@ from rest_framework.exceptions import ParseError
 
 
 class GoalList(APIView):
-    def is_displayed_on_date(self, goal):
+    def is_displayed_on_date(self, goal, date):
         if not goal.is_scheduled:
             return False
         start_at = goal.start_at
@@ -65,7 +65,7 @@ class GoalList(APIView):
         ):  # 날짜, 요일이 query parameter로 들어온 경우 -> 요일 상세 -> impossible day로 선택된 날짜라도 리턴함.
             displayed_goals = []
             for goal in goals:
-                if self.is_displayed_on_date(goal):
+                if self.is_displayed_on_date(goal, date):
                     displayed_goals.append(goal.id)
             goals = goals.filter(id__in=displayed_goals)
         elif (
