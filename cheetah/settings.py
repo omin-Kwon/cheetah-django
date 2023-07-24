@@ -14,7 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 import os, environ
 
-#AUTH_USER_MODEL = 'account.CustomUser' 
+# AUTH_USER_MODEL = 'account.CustomUser'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
     # "django.contrib.sites",
     # "dj_rest_auth",
     # "dj_rest_auth.registration",
@@ -52,7 +53,7 @@ INSTALLED_APPS = [
     # "allauth.account",
     # "allauth.socialaccount",
     # "allauth.socialaccount.providers.kakao",
-    'colorfield',
+    "colorfield",
     "account",
     "tag",
     "goal",
@@ -165,12 +166,16 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN": "access_token",
     "REFRESH_TOKEN": "refresh_token",
 }
-
-CORS_ALLOWED_ORIGINS= [ # (헤더) Access-Control-Allow-Origin 에 담을 주소들
-    'http://127.0.0.1:3000', 
-    'http://localhost:3000',
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
 ]
-CORS_ALLOW_CREDENTIALS = True # cookie를 주고받으려면 얘를 True로 설정해야 해요.
+
+CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주소들
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+]
+CORS_ALLOW_CREDENTIALS = True  # cookie를 주고받으려면 얘를 True로 설정해야 해요.
 CORS_ALLOW_HEADERS = (
     "accept",
     "authorization",

@@ -7,7 +7,6 @@ from rest_framework.exceptions import NotFound, ParseError
 from django.db.models import Q
 
 
-
 from django.db.models import Count
 from tag.models import Tag
 
@@ -18,12 +17,21 @@ from .serializers import (
     GoalSerializer,
     GoalwithTodoSerializer,
     ImpossibleDatesSerializer,
-    DailyHourOfGoalsSerializer
+    DailyHourOfGoalsSerializer,
 )
 from rest_framework.exceptions import ParseError
 
 
 class GoalList(APIView):
+    def is_displayed_on_date(self, goal):
+        if not goal.is_scheduled:
+            return False
+        start_at = goal.start_at
+        finish_at = goal.finish_at
+        if start_at > date or finish_at < date:
+            return False
+        return True
+
     def get(self, request):
         if not request.user.is_authenticated:
             return Response(
@@ -31,7 +39,7 @@ class GoalList(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         date_string = request.query_params.get("date", None)  # yyyy-mm-dd
-        month_string = request.query_params.get("month", None) # yyyy-mm
+        month_string = request.query_params.get("month", None)  # yyyy-mm
         try:
             if date_string:
                 date = datetime.strptime(date_string, "%Y-%m-%d").date()
@@ -44,40 +52,43 @@ class GoalList(APIView):
                 first_day = dt.date(month.year, month.month, 1)
                 _, last_day_num = calendar.monthrange(month.year, month.month)
                 last_day = dt.date(month.year, month.month, last_day_num)
+            else:
+                month = None
         except ValueError:
             raise ParseError(
                 "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
             )
         goals = Goal.objects.filter(user=request.user)
 
-        def is_displayed_on_date(goal):
-            if not goal.is_scheduled:
-                return False
-            start_at = goal.start_at
-            finish_at = goal.finish_at
-            if start_at > date or finish_at < date:
-                return False
-            return True
-
-        if date is not None:  # 날짜, 요일이 query parameter로 들어온 경우 -> 요일 상세 -> impossible day로 선택된 날짜라도 리턴함.
+        if (
+            date is not None
+        ):  # 날짜, 요일이 query parameter로 들어온 경우 -> 요일 상세 -> impossible day로 선택된 날짜라도 리턴함.
             displayed_goals = []
             for goal in goals:
-                if is_displayed_on_date(goal):
+                if self.is_displayed_on_date(goal):
                     displayed_goals.append(goal.id)
             goals = goals.filter(id__in=displayed_goals)
-        elif month is not None: # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
-            goals = goals.filter((Q(start_at__lte=last_day) & Q(finish_at__gte=first_day)))
+        elif (
+            month is not None
+        ):  # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
+            goals = goals.filter(
+                (Q(start_at__lte=last_day) & Q(finish_at__gte=first_day))
+            )
+
         # else : #날짜, 요일이 query parameter로 안들어옴. 전체 goal을 전달하는 경우. 내 목표 -> 태그로 필터링되지 않은 전체 goal
         else:
             displayed_goals = []
             for goal in goals:
                 if goal.tag.is_used == True:
                     displayed_goals.append(goal.id)
-                goals = goals.filter(id__in = displayed_goals)
+                    print(goal.id)
+                goals = goals.filter()
         serializer = GoalSerializer(goals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):  # 최초의 목표 추가. 캘린더에도 추가하는 경우 "add_calendar" is not None. 추가된 목표를 캘린더에 추가하는 로직은 GoalDetail에서 구현
+    def post(
+        self, request
+    ):  # 최초의 목표 추가. 캘린더에도 추가하는 경우 "add_calendar" is not None. 추가된 목표를 캘린더에 추가하는 로직은 GoalDetail에서 구현
         if not request.user.is_authenticated:
             return Response(
                 {"detail": "Authentication credentials not provided"},
@@ -106,7 +117,7 @@ class GoalList(APIView):
                 estimated_time = request.data.get("estimated_time", None)
                 goal = Goal.objects.create(
                     user=user,
-                    tag=tag, 
+                    tag=tag,
                     title=title,
                     start_at=start_at,
                     finish_at=finish_at,
@@ -122,8 +133,10 @@ class GoalList(APIView):
                         try:
                             date = datetime.strptime(impossible_date, "%Y-%m-%d").date()
                         except ValueError:
-                            raise ParseError("Invalid date format. Use 'YYYY-MM-DD' format.")
-                        ImpossibleDates.objects.create(goal=goal, date = date)
+                            raise ParseError(
+                                "Invalid date format. Use 'YYYY-MM-DD' format."
+                            )
+                        ImpossibleDates.objects.create(goal=goal, date=date)
             else:
                 goal = Goal.objects.create(user=user, tag_id=tag_id, title=title)
         except (ValueError, KeyError):
@@ -210,8 +223,10 @@ class GoalDetail(APIView):
                         try:
                             date = datetime.strptime(impossible_date, "%Y-%m-%d").date()
                         except ValueError:
-                            raise ParseError("Invalid date format. Use 'YYYY-MM-DD' format.")
-                        ImpossibleDates.objects.create(goal=goal, date = date)
+                            raise ParseError(
+                                "Invalid date format. Use 'YYYY-MM-DD' format."
+                            )
+                        ImpossibleDates.objects.create(goal=goal, date=date)
             except (ValueError, KeyError):
                 raise ParseError(
                     "Invalid request body. Check your data types and keys."
@@ -249,10 +264,14 @@ class GoalDetail(APIView):
                         ImpossibleDates.objects.delete(goal=goal)
                         for impossible_date in impossible_dates_list:
                             try:
-                                date = datetime.strptime(impossible_date, "%Y-%m-%d").date()
+                                date = datetime.strptime(
+                                    impossible_date, "%Y-%m-%d"
+                                ).date()
                             except ValueError:
-                                raise ParseError("Invalid date format. Use 'YYYY-MM-DD' format.")
-                            ImpossibleDates.objects.create(goal=goal, date = date)
+                                raise ParseError(
+                                    "Invalid date format. Use 'YYYY-MM-DD' format."
+                                )
+                            ImpossibleDates.objects.create(goal=goal, date=date)
                 goal.save()
             except (ValueError, KeyError):
                 raise ParseError(
@@ -362,9 +381,10 @@ class ImpossibleDatesOfGoal(APIView):
         impossibleDate.delete()
         return Response("Deleted successfully.", status=status.HTTP_204_NO_CONTENT)
 
+
 class GoalHistory(APIView):
     def get(self, request):
-        month_string = request.query_params.get("month", None) # yyyy-mm
+        month_string = request.query_params.get("month", None)  # yyyy-mm
         try:
             if month_string:
                 month_string += "-01"
@@ -373,12 +393,18 @@ class GoalHistory(APIView):
                 first_day = dt.date(month.year, month.month, 1)
                 _, last_day_num = calendar.monthrange(month.year, month.month)
                 last_day = dt.date(month.year, month.month, last_day_num)
+            else:
+                month = None
         except ValueError:
             raise ParseError(
                 "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
             )
-        if month is not None: # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
+        if (
+            month is not None
+        ):  # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
             dailyHourOfGoals = DailyHourOfGoals.objects.filter(user=request.user)
-            dailyHourOfGoals = dailyHourOfGoals.filter((Q(date__gte=first_day) & Q(date__lte=last_day)))
+            dailyHourOfGoals = dailyHourOfGoals.filter(
+                (Q(date__gte=first_day) & Q(date__lte=last_day))
+            )
         serializer = DailyHourOfGoalsSerializer(dailyHourOfGoals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
