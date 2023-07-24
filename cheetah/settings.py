@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "tag",
     "goal",
     "todo",
+    "corsheaders",
 ]
 
 REST_USE_JWT = True
@@ -69,6 +70,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "cheetah.urls"
@@ -163,3 +165,17 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN": "access_token",
     "REFRESH_TOKEN": "refresh_token",
 }
+
+CORS_ALLOWED_ORIGINS= [ # (헤더) Access-Control-Allow-Origin 에 담을 주소들
+    'http://127.0.0.1:3000', 
+    'http://localhost:3000',
+]
+CORS_ALLOW_CREDENTIALS = True # cookie를 주고받으려면 얘를 True로 설정해야 해요.
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
