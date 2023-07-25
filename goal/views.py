@@ -9,6 +9,7 @@ from django.db.models import Q
 
 from django.db.models import Count
 from tag.models import Tag
+from todo.models import Todo
 
 import datetime as dt
 from datetime import datetime
@@ -137,6 +138,14 @@ class GoalList(APIView):
                                 "Invalid date format. Use 'YYYY-MM-DD' format."
                             )
                         ImpossibleDates.objects.create(goal=goal, date=date)
+                todo_list = request.data.get("todo_list", None)
+                if todo_list is not None:
+                    for todo in todo_list:
+                        Todo.objects.create(
+                            goal=goal,
+                            title=todo["title"],
+                            is_completed="false",
+                        )
             else:
                 goal = Goal.objects.create(user=user, tag_id=tag_id, title=title)
         except (ValueError, KeyError):

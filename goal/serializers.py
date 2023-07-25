@@ -22,6 +22,7 @@ class ImpossibleDatesSerializer(ModelSerializer):
 
 class GoalSerializer(ModelSerializer):
     impossibledates_set = ImpossibleDatesSerializer(many=True, read_only=True)
+    tag = TagSerializer(many=False, read_only=True)
 
     # availabledays = AvailableDaysSerializer(required=False)
     class Meta:
