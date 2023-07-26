@@ -50,9 +50,16 @@ class GoalList(APIView):
                 month_string += "-01"
                 month = datetime.strptime(month_string, "%Y-%m-%d").date()
                 print(month)
-                first_day = dt.date(month.year, month.month, 1)
-                _, last_day_num = calendar.monthrange(month.year, month.month)
-                last_day = dt.date(month.year, month.month, last_day_num)
+                if month.month == 1:
+                    first_day = dt.date(month.year - 1, 12, 1)
+                else:
+                    first_day = dt.date(month.year, month.month - 1, 1)
+                if month.month == 12:
+                    _, last_day_num = calendar.monthrange(month.year + 1, 1)
+                    last_day = dt.date(month.year + 1, 1, last_day_num)
+                else:
+                    _, last_day_num = calendar.monthrange(month.year, month.month + 1)
+                    last_day = dt.date(month.year, month.month + 1, last_day_num)
             else:
                 month = None
         except ValueError:
@@ -147,6 +154,14 @@ class GoalList(APIView):
                             is_completed="false",
                         )
             else:
+                todo_list = request.data.get("todo_list", None)
+                if todo_list is not None:
+                    for todo in todo_list:
+                        Todo.objects.create(
+                            goal=goal,
+                            title=todo["title"],
+                            is_completed="false",
+                        )
                 goal = Goal.objects.create(user=user, tag_id=tag_id, title=title)
         except (ValueError, KeyError):
             raise ParseError(
@@ -342,8 +357,9 @@ class ImpossibleDatesOfGoal(APIView):
                 {"detail": "This goal is not scheduled."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        print("request.data", request.data)
         date_string = request.data.get("date", None)
+        # print("date_string", date_string)
         if date_string is None:
             raise ParseError("Missing 'date' parameter in the request body.")
 
@@ -362,7 +378,7 @@ class ImpossibleDatesOfGoal(APIView):
         serializer = ImpossibleDatesSerializer(impossibleDate)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, goal_id):  # 불가능한 날짜 삭제
+    def patch(self, request, goal_id):  # 불가능한 날짜 삭제
         if not request.user.is_authenticated:
             return Response(
                 {"detail": "Authentication credentials not provided"},
@@ -370,6 +386,7 @@ class ImpossibleDatesOfGoal(APIView):
             )
 
         date_string = request.data.get("date")
+        print("request", request.data)
         if date_string is None:
             raise ParseError("Missing 'date' parameter in the request body.")
 
