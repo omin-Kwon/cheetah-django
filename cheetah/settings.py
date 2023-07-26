@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 import os, environ
 
+
 # AUTH_USER_MODEL = 'account.CustomUser'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -53,11 +54,13 @@ INSTALLED_APPS = [
     # "allauth.account",
     # "allauth.socialaccount",
     # "allauth.socialaccount.providers.kakao",
+    'django_apscheduler',
     "colorfield",
     "account",
     "tag",
     "goal",
     "todo",
+    "pushscheduler",
 ]
 
 REST_USE_JWT = True
@@ -166,14 +169,17 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN": "refresh_token",
 }
 CSRF_TRUSTED_ORIGINS = [
+    "http://172.30.1.49:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
 ]
 
 CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주소들
+    "http://172.30.1.49:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
 ]
+# CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True  # cookie를 주고받으려면 얘를 True로 설정해야 해요.
 CORS_ALLOW_HEADERS = (
     "accept",
@@ -183,3 +189,6 @@ CORS_ALLOW_HEADERS = (
     "x-csrftoken",
     "x-requested-with",
 )
+
+SCHEDULER_DEFAULT = True
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
