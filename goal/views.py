@@ -91,7 +91,7 @@ class GoalList(APIView):
                     displayed_goals.append(goal.id)
                     print(goal.id)
                 goals = goals.filter()
-        serializer = GoalSerializer(goals, many=True)
+        serializer = GoalwithTodoSerializer(goals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(
@@ -129,12 +129,13 @@ class GoalList(APIView):
                     title=title,
                     start_at=start_at,
                     finish_at=finish_at,
-                    is_scheduled=is_scheduled,
+                    is_scheduled=True,
                     residual_time=residual_time,
                     estimated_time=estimated_time,
                     cumulative_time=0,
                     progress_rate=0,
                 )
+                print("goal 생성 완료")
                 impossible_dates_list = request.data.get("impossible_dates", None)
                 if impossible_dates_list is not None:
                     for impossible_date in impossible_dates_list:
@@ -145,24 +146,32 @@ class GoalList(APIView):
                                 "Invalid date format. Use 'YYYY-MM-DD' format."
                             )
                         ImpossibleDates.objects.create(goal=goal, date=date)
+                        print("impossible date 생성 완료")
                 todo_list = request.data.get("todo_list", None)
                 if todo_list is not None:
                     for todo in todo_list:
                         Todo.objects.create(
                             goal=goal,
                             title=todo["title"],
-                            is_completed="false",
+                            is_completed=False,
                         )
+                        print("todo", todo)
             else:
+                goal = Goal.objects.create(
+                    user=user,
+                    tag=tag,
+                    title=title,
+                    is_scheduled=False,
+                )
                 todo_list = request.data.get("todo_list", None)
                 if todo_list is not None:
                     for todo in todo_list:
                         Todo.objects.create(
                             goal=goal,
                             title=todo["title"],
-                            is_completed="false",
+                            is_completed=False,
                         )
-                goal = Goal.objects.create(user=user, tag_id=tag_id, title=title)
+                        print("todo", todo)
         except (ValueError, KeyError):
             raise ParseError(
                 "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
