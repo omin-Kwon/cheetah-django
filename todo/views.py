@@ -32,6 +32,17 @@ class TodoList(APIView):
         serializer = TodoSerializer(todo)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response("로그인이 필요합니다.", status=status.HTTP_401_UNAUTHORIZED)
+        goal = request.query_params.get("goal", None)
+        if goal is not None:
+            todo = Todo.objects.filter(goal_id=goal)
+        else:
+            todo = Todo.objects.all()
+        serializer = TodoSerializer(todo, many=True)
+        return Response(serializer.data)
+
 
 class TodoDetail(APIView):
     def patch(self, request, todo_id):

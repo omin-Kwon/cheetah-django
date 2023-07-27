@@ -325,9 +325,18 @@ class GoalDetail(APIView):
         calendar_only = request.query_params.get("calendar_only", None)
         goal = Goal.objects.get(id=goal_id)
         if calendar_only is not None:
-            goal.is_scheduled = False
             DailyHourOfGoals.objects.filter(user=request.user, goal=goal).delete()
-            ImpossibleDates.objects.delete(goal=goal)
+            ImpossibleDates.objects.filter(goal=goal).delete()
+            print("ImpossibleDates has deleted and DailyHourOfGoals has deleted")
+            goal.is_scheduled = False
+            goal.progress_rate = 0
+            goal.start_at = None
+            goal.finish_at = None
+            goal.cumulative_time = 0
+            goal.residual_time = 0
+            goal.estimated_time = 0
+            goal.save()
+            print("goal has saved")
         else:
             goal.delete()
         return Response("삭제되었습니다.", status=status.HTTP_204_NO_CONTENT)
