@@ -278,7 +278,7 @@ class GoalDetail(APIView):
         elif daily_check is None and add_calendar is None and rollback is None:
             try:
                 goal.title = request.data.get("title", None)
-                tag_title = request.data.get("tag", None)
+                tag_title = request.data.get("tag", None).get("title", None)
                 tag = Tag.objects.get(user=request.user, title=tag_title)
                 goal.tag = tag
                 if goal.is_scheduled:
