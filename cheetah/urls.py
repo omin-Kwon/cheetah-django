@@ -23,4 +23,5 @@ urlpatterns = [
     path("api/goal/", include("goal.urls")),
     path("api/tag/", include("tag.urls")),
     path("api/todo/", include("todo.urls")),
+    path("api/fcmtoken/", include("pushscheduler.urls"))
 ]

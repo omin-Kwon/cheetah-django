@@ -76,6 +76,7 @@ class GoalList(APIView):
                 if self.is_displayed_on_date(goal, date):
                     displayed_goals.append(goal.id)
             goals = goals.filter(id__in=displayed_goals)
+            print(goals)
         elif (
             month is not None
         ):  # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌

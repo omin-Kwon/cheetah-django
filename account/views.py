@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 from datetime import timedelta, date
+from pushscheduler.models import FCMToken
 
 
 import sys
@@ -182,6 +183,8 @@ class Logout(APIView):  # 로그아웃
                 {"detail": "로그인 후 다시 시도해주세요."}, status=status.HTTP_401_UNAUTHORIZED
             )
         RefreshToken(request.data["refresh"]).blacklist()
+        FCMToken.objects.filter(user=request.user).delete()
+        
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

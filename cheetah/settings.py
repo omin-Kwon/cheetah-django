@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os, environ
-
+import firebase_admin
+from firebase_admin import credentials
 
 # AUTH_USER_MODEL = 'account.CustomUser'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -60,7 +61,8 @@ INSTALLED_APPS = [
     "tag",
     "goal",
     "todo",
-    "pushscheduler",
+    # "pushscheduler",
+    "pushscheduler.apps.PushSchedulerConfig"
 ]
 
 REST_USE_JWT = True
@@ -192,3 +194,7 @@ CORS_ALLOW_HEADERS = (
 
 SCHEDULER_DEFAULT = True
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
+
+cred_path = os.path.join(BASE_DIR, "serviceAccountKey.json")
+cred = credentials.Certificate(cred_path)
+firebase_admin.initialize_app(cred)

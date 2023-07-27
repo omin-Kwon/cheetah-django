@@ -170,6 +170,8 @@ key.py
 #VAPID Key 관련 키
 default.json
 
+#fcm 관련 키
+serviceAccountKey.json
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
