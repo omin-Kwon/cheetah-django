@@ -216,7 +216,8 @@ class GoalDetail(APIView):
         if daily_check is not None:
             try:
                 goal.prev_update_at = goal.update_at
-                goal.update_at = dt.date.today()
+                goal.update_at = datetime.now().date()
+                print(goal.update_at)
                 goal.prev_residual_time = goal.residual_time
                 goal.residual_time = goal.residual_time - request.data.get("daily_time")
                 goal.prev_cumulative_time = goal.cumulative_time
@@ -231,7 +232,7 @@ class GoalDetail(APIView):
                     user=request.user,
                     goal=goal,
                     hour=request.data.get("daily_time"),
-                    date=dt.date.today(),
+                    date= dt.date.today(),
                 )
                 goal.save()
             except (ValueError, KeyError):
@@ -248,8 +249,10 @@ class GoalDetail(APIView):
                 finish_at_string = request.data.get("finish_at", None)
                 finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                 goal.finish_at = finish_at
+                goal.cumulative_time = 0
                 goal.residual_time = request.data.get("estimated_time", None)
                 goal.estimated_time = request.data.get("estimated_time", None)
+                goal.progress_rate = 0
                 goal.save()
                 impossible_dates_list = request.data.get("impossible_dates", None)
                 if impossible_dates_list is not None:
