@@ -294,6 +294,7 @@ class GoalDetail(APIView):
                     if goal.progress_rate == 100:
                         goal.is_completed = True
                     impossible_dates_list = request.data.get("impossible_dates", None)
+                    goal.update_at = request.data.get("update_at", None)
                     if impossible_dates_list is not None:
                         ImpossibleDates.objects.delete(goal=goal)
                         for impossible_date in impossible_dates_list:
