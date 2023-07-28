@@ -33,7 +33,11 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "https://port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app/",
+]
 
 
 # Application definition
@@ -55,14 +59,14 @@ INSTALLED_APPS = [
     # "allauth.account",
     # "allauth.socialaccount",
     # "allauth.socialaccount.providers.kakao",
-    'django_apscheduler',
+    "django_apscheduler",
     "colorfield",
     "account",
     "tag",
     "goal",
     "todo",
     # "pushscheduler",
-    "pushscheduler.apps.PushSchedulerConfig"
+    "pushscheduler.apps.PushSchedulerConfig",
 ]
 
 REST_USE_JWT = True
@@ -174,6 +178,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://172.30.1.49:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
+    "https://port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app/",
 ]
 
 CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주소들
@@ -191,7 +196,7 @@ CORS_ALLOW_HEADERS = (
     "x-csrftoken",
     "x-requested-with",
 )
-TIME_ZONE = 'Asia/Seoul'
+TIME_ZONE = "Asia/Seoul"
 SCHEDULER_DEFAULT = True
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
 
