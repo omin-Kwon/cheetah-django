@@ -250,6 +250,7 @@ class GoalDetail(APIView):
                 goal.finish_at = finish_at
                 goal.residual_time = request.data.get("estimated_time", None)
                 goal.estimated_time = request.data.get("estimated_time", None)
+                goal.is_completed = request.data.get("is_completed", None)
                 goal.save()
                 impossible_dates_list = request.data.get("impossible_dates", None)
                 if impossible_dates_list is not None:
@@ -291,6 +292,7 @@ class GoalDetail(APIView):
                     goal.finish_at = finish_at
                     goal.residual_time = request.data.get("residual_time", None)
                     goal.progress_rate = request.data.get("progress_rate", None)
+                    goal.is_completed = request.data.get("is_completed", None)
                     if goal.progress_rate == 100:
                         goal.is_completed = True
                     impossible_dates_list = request.data.get("impossible_dates", None)
