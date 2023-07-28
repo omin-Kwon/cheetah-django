@@ -219,8 +219,9 @@ class GoalDetail(APIView):
                 goal.update_at = dt.date.today()
                 goal.prev_residual_time = goal.residual_time
                 goal.residual_time = round(
-                    float(goal.residual_time - request.data.get("daily_time"), 2)
+                    float(goal.residual_time - request.data.get("daily_time")), 2
                 )
+
                 goal.prev_cumulative_time = goal.cumulative_time
                 goal.cumulative_time = goal.cumulative_time + request.data.get(
                     "daily_time"
@@ -251,10 +252,10 @@ class GoalDetail(APIView):
                 finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                 goal.finish_at = finish_at
                 goal.residual_time = round(
-                    float(request.data.get("estimated_time", None), 2)
+                    float(request.data.get("estimated_time", None)), 2
                 )
                 goal.estimated_time = round(
-                    float(request.data.get("estimated_time", None), 2)
+                    float(request.data.get("estimated_time", None)), 2
                 )
                 goal.is_completed = request.data.get("is_completed", None)
                 goal.save()
@@ -297,7 +298,7 @@ class GoalDetail(APIView):
                     finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                     goal.finish_at = finish_at
                     goal.residual_time = round(
-                        float(request.data.get("residual_time", None), 2)
+                        float(request.data.get("residual_time", None)), 2
                     )
                     goal.progress_rate = request.data.get("progress_rate", None)
                     goal.is_completed = request.data.get("is_completed", None)
