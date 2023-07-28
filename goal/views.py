@@ -91,7 +91,7 @@ class GoalList(APIView):
                 if goal.tag.is_used == True:
                     displayed_goals.append(goal.id)
                     print(goal.id)
-                goals = goals.filter()
+            goals = goals.filter(id__in=displayed_goals)
         serializer = GoalwithTodoSerializer(goals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -219,7 +219,10 @@ class GoalDetail(APIView):
                 goal.update_at = datetime.now().date()
                 print(goal.update_at)
                 goal.prev_residual_time = goal.residual_time
-                goal.residual_time = goal.residual_time - request.data.get("daily_time")
+                goal.residual_time = round(
+                    float(goal.residual_time - request.data.get("daily_time")), 2
+                )
+
                 goal.prev_cumulative_time = goal.cumulative_time
                 goal.cumulative_time = goal.cumulative_time + request.data.get(
                     "daily_time"
@@ -249,10 +252,15 @@ class GoalDetail(APIView):
                 finish_at_string = request.data.get("finish_at", None)
                 finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                 goal.finish_at = finish_at
-                goal.cumulative_time = 0
-                goal.residual_time = request.data.get("estimated_time", None)
-                goal.estimated_time = request.data.get("estimated_time", None)
                 goal.progress_rate = 0
+                goal.cumulative_time = 0
+                goal.residual_time = round(
+                    float(request.data.get("estimated_time", None)), 2
+                )
+                goal.estimated_time = round(
+                    float(request.data.get("estimated_time", None)), 2
+                )
+                goal.is_completed = request.data.get("is_completed", None)
                 goal.save()
                 impossible_dates_list = request.data.get("impossible_dates", None)
                 if impossible_dates_list is not None:
@@ -292,11 +300,15 @@ class GoalDetail(APIView):
                     finish_at_string = request.data.get("finish_at", None)
                     finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                     goal.finish_at = finish_at
-                    goal.residual_time = request.data.get("residual_time", None)
+                    goal.residual_time = round(
+                        float(request.data.get("residual_time", None)), 2
+                    )
                     goal.progress_rate = request.data.get("progress_rate", None)
+                    goal.is_completed = request.data.get("is_completed", None)
                     if goal.progress_rate == 100:
                         goal.is_completed = True
                     impossible_dates_list = request.data.get("impossible_dates", None)
+                    goal.update_at = request.data.get("update_at", None)
                     if impossible_dates_list is not None:
                         ImpossibleDates.objects.delete(goal=goal)
                         for impossible_date in impossible_dates_list:
