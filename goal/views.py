@@ -91,7 +91,7 @@ class GoalList(APIView):
                 if goal.tag.is_used == True:
                     displayed_goals.append(goal.id)
                     print(goal.id)
-                goals = goals.filter()
+            goals = goals.filter(id__in=displayed_goals)
         serializer = GoalwithTodoSerializer(goals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
