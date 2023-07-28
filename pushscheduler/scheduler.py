@@ -16,8 +16,8 @@ def start():
 
     scheduler.add_job(
         send_user_daily_schedule,
-        trigger = CronTrigger(hour=0),
-        #'interval', seconds = 10,
+        #trigger = CronTrigger(hour=0),
+        'interval', seconds = 10,
         max_instances=1,
         name="daily_schedule",
     )
