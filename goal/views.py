@@ -218,7 +218,9 @@ class GoalDetail(APIView):
                 goal.prev_update_at = goal.update_at
                 goal.update_at = dt.date.today()
                 goal.prev_residual_time = goal.residual_time
-                goal.residual_time = goal.residual_time - request.data.get("daily_time")
+                goal.residual_time = round(
+                    goal.residual_time - request.data.get("daily_time"), 2
+                )
                 goal.prev_cumulative_time = goal.cumulative_time
                 goal.cumulative_time = goal.cumulative_time + request.data.get(
                     "daily_time"
@@ -248,8 +250,8 @@ class GoalDetail(APIView):
                 finish_at_string = request.data.get("finish_at", None)
                 finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                 goal.finish_at = finish_at
-                goal.residual_time = request.data.get("estimated_time", None)
-                goal.estimated_time = request.data.get("estimated_time", None)
+                goal.residual_time = round(request.data.get("estimated_time", None), 2)
+                goal.estimated_time = round(request.data.get("estimated_time", None), 2)
                 goal.is_completed = request.data.get("is_completed", None)
                 goal.save()
                 impossible_dates_list = request.data.get("impossible_dates", None)
@@ -290,7 +292,9 @@ class GoalDetail(APIView):
                     finish_at_string = request.data.get("finish_at", None)
                     finish_at = datetime.strptime(finish_at_string, "%Y-%m-%d").date()
                     goal.finish_at = finish_at
-                    goal.residual_time = request.data.get("residual_time", None)
+                    goal.residual_time = round(
+                        request.data.get("residual_time", None), 2
+                    )
                     goal.progress_rate = request.data.get("progress_rate", None)
                     goal.is_completed = request.data.get("is_completed", None)
                     if goal.progress_rate == 100:
