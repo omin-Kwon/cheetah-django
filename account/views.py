@@ -22,7 +22,6 @@ import time
 import json
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from key import NCLOUD_ACCESS_KEY, NCLOUD_SECRET_KEY, SERVICE_ID, SEND_PHONE_NUM
 
 # Create your views here.
 
@@ -184,7 +183,7 @@ class Logout(APIView):  # 로그아웃
             )
         RefreshToken(request.data["refresh"]).blacklist()
         FCMToken.objects.filter(user=request.user).delete()
-        
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
