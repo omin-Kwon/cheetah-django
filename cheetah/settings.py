@@ -179,12 +179,14 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "https://port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app",
+    "https://web-cheetah-react-eg4e2alkmzysff.sel4.cloudtype.app/",
 ]
 
 CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주소들
     "http://172.30.1.49:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3000",
+    "https://web-cheetah-react-eg4e2alkmzysff.sel4.cloudtype.app/",
 ]
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True  # cookie를 주고받으려면 얘를 True로 설정해야 해요.
