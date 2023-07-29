@@ -14,6 +14,7 @@ from random import randint
 from django.http import HttpResponse
 import datetime
 from django.utils import timezone
+from key import NCLOUD_ACCESS_KEY, NCLOUD_SECRET_KEY, SERVICE_ID, SEND_PHONE_NUM
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
@@ -59,9 +60,8 @@ class AuthSMS(TimeStampedModel):
         self.send_sms()
 
     def make_signature(self, message):
-        secret_key = os.getenv(
-            "NCLOUD_SCRET_KEY"
-        )  # secret key (from portal or Sub Account)
+        secret_key = NCLOUD_SECRET_KEY
+        # secret key (from portal or Sub Account)
         secret_key = bytes(str(secret_key), "UTF-8")
         signingKey = base64.b64encode(
             hmac.new(secret_key, message, digestmod=hashlib.sha256).digest()
@@ -69,10 +69,10 @@ class AuthSMS(TimeStampedModel):
         return signingKey
 
     def send_sms(self):
-        URI = "/sms/v2/services/{}/messages".format(os.getenv("SERVICE_ID"))
+        URI = "/sms/v2/services/{}/messages".format(SERVICE_ID)
         API_URL = "https://sens.apigw.ntruss.com{}".format(URI)
         timestamp = str(int(time.time() * 1000))
-        ACCESS_KEY = os.getenv("NCLOUD_ACCESS_KEY")
+        ACCESS_KEY = NCLOUD_ACCESS_KEY
 
         message = "POST" + " " + URI + "\n" + timestamp + "\n" + str(ACCESS_KEY)
         message = bytes(message, "UTF-8")
@@ -90,7 +90,7 @@ class AuthSMS(TimeStampedModel):
             "type": "SMS",
             "contentType": "COMM",
             "countryCode": "82",
-            "from": os.getenv("SEND_PHONE_NUM"),
+            "from": SEND_PHONE_NUM,
             "content": "[테스트] 인증 번호 [{}]를 입력해주세요.".format(self.auth_number),
             "messages": [{"to": self.phone_num}],
         }
