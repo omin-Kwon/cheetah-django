@@ -59,20 +59,22 @@ class AuthSMS(TimeStampedModel):
         self.send_sms()
 
     def make_signature(self, message):
-        secret_key = os.getenv("NCLOUD_SCRET_KEY")  # secret key (from portal or Sub Account)
-        secret_key = bytes(secret_key, "UTF-8")
+        secret_key = os.getenv(
+            "NCLOUD_SCRET_KEY"
+        )  # secret key (from portal or Sub Account)
+        secret_key = bytes(str(secret_key), "UTF-8")
         signingKey = base64.b64encode(
             hmac.new(secret_key, message, digestmod=hashlib.sha256).digest()
         )
         return signingKey
 
     def send_sms(self):
-        URI = "/sms/v2/services/{}/messages".format(os.getenv("SERVICE_ID")
+        URI = "/sms/v2/services/{}/messages".format(os.getenv("SERVICE_ID"))
         API_URL = "https://sens.apigw.ntruss.com{}".format(URI)
         timestamp = str(int(time.time() * 1000))
         ACCESS_KEY = os.getenv("NCLOUD_ACCESS_KEY")
 
-        message = "POST" + " " + URI + "\n" + timestamp + "\n" + ACCESS_KEY
+        message = "POST" + " " + URI + "\n" + timestamp + "\n" + str(ACCESS_KEY)
         message = bytes(message, "UTF-8")
 
         SIGNATURE = self.make_signature(message)
