@@ -66,6 +66,7 @@ class GoalList(APIView):
             raise ParseError(
                 "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
             )
+        # tag의 is_used가 True인 것만 보내줌
         goals = Goal.objects.filter(user=request.user)
 
         if (
@@ -73,13 +74,18 @@ class GoalList(APIView):
         ):  # 날짜, 요일이 query parameter로 들어온 경우 -> 요일 상세 -> impossible day로 선택된 날짜라도 리턴함.
             displayed_goals = []
             for goal in goals:
-                if self.is_displayed_on_date(goal, date):
+                if self.is_displayed_on_date(goal, date) & goal.tag.is_used == True:
                     displayed_goals.append(goal.id)
             goals = goals.filter(id__in=displayed_goals)
             print(goals)
         elif (
             month is not None
         ):  # 월이 query parameter로 들어온 경우. 캘린더에 띄워줄 goal. 날짜별 색 표시를 고려하여 시작일이 해당 월의 마지막날보다 빠르고, 종료일이 해달 월의 첫날보다 느린 모든 계획을 보내줌
+            displayed_goals = []
+            for goal in goals:
+                if goal.tag.is_used == True:
+                    displayed_goals.append(goal.id)
+            goals = goals.filter(id__in=displayed_goals)
             goals = goals.filter(
                 (Q(start_at__lte=last_day) & Q(finish_at__gte=first_day))
             )
@@ -235,7 +241,7 @@ class GoalDetail(APIView):
                     user=request.user,
                     goal=goal,
                     hour=request.data.get("daily_time"),
-                    date= dt.date.today(),
+                    date=dt.date.today(),
                 )
                 goal.save()
             except (ValueError, KeyError):
