@@ -35,8 +35,9 @@ def set_token_on_response_cookie(user: User, autologin=False) -> Response:
     res = Response(user_profile_serializer.data, status=status.HTTP_201_CREATED)
     res.set_cookie("refresh_token", value=str(token), domain=".cheetah-do.xyz")
     res.set_cookie(
-        "access_token", value=str(token.access_token, domain=".cheetah-do.xyz")
+        "access_token", value=str(token.access_token), domain=".cheetah-do.xyz"
     )
+
     return res
 
 
