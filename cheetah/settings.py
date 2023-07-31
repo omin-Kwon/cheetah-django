@@ -37,6 +37,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app",
+    "cheetah-do.xyz",
 ]
 
 
@@ -180,6 +181,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "https://port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app",
     "https://web-cheetah-react-eg4e2alkmzysff.sel4.cloudtype.app",
+    "https://cheetah-do.xyz",
 ]
 
 CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주소들
