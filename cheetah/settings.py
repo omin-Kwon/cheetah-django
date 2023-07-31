@@ -203,6 +203,9 @@ CORS_ALLOW_HEADERS = (
     "x-csrftoken",
     "x-requested-with",
 )
+
+SEESION_COOKIE_DOMAIN = ".cheetah-do.xyz"
+
 TIME_ZONE = "Asia/Seoul"
 SCHEDULER_DEFAULT = True
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
