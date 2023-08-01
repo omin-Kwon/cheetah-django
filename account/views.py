@@ -33,8 +33,11 @@ def set_token_on_response_cookie(user: User, autologin=False) -> Response:
     user_profile = UserProfile.objects.get(user=user)
     user_profile_serializer = UserProfileSerializer(user_profile)
     res = Response(user_profile_serializer.data, status=status.HTTP_201_CREATED)
-    res.set_cookie("refresh_token", value=str(token))
-    res.set_cookie("access_token", value=str(token.access_token))
+    res.set_cookie("refresh_token", value=str(token), domain=".cheetah-do.xyz")
+    res.set_cookie(
+        "access_token", value=str(token.access_token), domain=".cheetah-do.xyz"
+    )
+
     return res
 
 
@@ -183,9 +186,12 @@ class Logout(APIView):  # 로그아웃
                 {"detail": "로그인 후 다시 시도해주세요."}, status=status.HTTP_401_UNAUTHORIZED
             )
         RefreshToken(request.data["refresh"]).blacklist()
+        response = Response(status=status.HTTP_204_NO_CONTENT)
+        response.delete_cookie("access_token", domain=".cheetah-do.xyz")
+        response.delete_cookie("refresh_token", domain=".cheetah-do.xyz")
         FCMToken.objects.filter(user=request.user).delete()
 
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return response
 
 
 class TokenRefresh(APIView):  # 액세스 토큰 재발급
@@ -201,7 +207,9 @@ class TokenRefresh(APIView):  # 액세스 토큰 재발급
             )
         new_access_token = str(RefreshToken(refresh_token).access_token)
         response = Response({"detail": "token refreshed"}, status=status.HTTP_200_OK)
-        response.set_cookie("access_token", value=str(new_access_token))
+        response.set_cookie(
+            "access_token", value=str(new_access_token), domain=".cheetah-do.xyz"
+        )
         return response
 
 

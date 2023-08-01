@@ -37,6 +37,8 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app",
+    "api.cheetah-do.xyz",
+    "cheetah-do.xyz",
 ]
 
 
@@ -180,6 +182,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "https://port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app",
     "https://web-cheetah-react-eg4e2alkmzysff.sel4.cloudtype.app",
+    "https://cheetah-do.xyz",
+    "https://api.cheetah-do.xyz",
 ]
 
 CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주소들
@@ -187,6 +191,7 @@ CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주�
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "https://web-cheetah-react-eg4e2alkmzysff.sel4.cloudtype.app",
+    "https://cheetah-do.xyz",
 ]
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True  # cookie를 주고받으려면 얘를 True로 설정해야 해요.
@@ -198,6 +203,9 @@ CORS_ALLOW_HEADERS = (
     "x-csrftoken",
     "x-requested-with",
 )
+
+SEESION_COOKIE_DOMAIN = ".cheetah-do.xyz"
+
 TIME_ZONE = "Asia/Seoul"
 SCHEDULER_DEFAULT = True
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Default
