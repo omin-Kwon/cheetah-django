@@ -285,6 +285,7 @@ class GoalDetail(APIView):
             goal.progress_rate = goal.prev_progress_rate
             goal.cumulative_time = goal.prev_cumulative_time
             goal.residual_time = goal.prev_residual_time
+            goal.is_completed = False
             goal.save()
         # 상세에서 수정하는 경우
         elif daily_check is None and add_calendar is None and rollback is None:

@@ -139,6 +139,7 @@ class FindPassword(APIView):  # 비밀번호 찾기
             username = user.username
             if username == request.query_params["username"]:
                 return Response({"detail": "OK"}, status=status.HTTP_200_OK)
+            else: return Response({"username": "NOT FOUND"}, status=status.HTTP_404_NOT_FOUND)
         else:
             return Response({"username": "NOT FOUND"}, status=status.HTTP_404_NOT_FOUND)
 
