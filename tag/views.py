@@ -39,7 +39,7 @@ class TagList(APIView):
 
         tag = Tag.objects.create(title=title, color=color, is_used=is_used, user=user)
         serializer = TagSerializer(tag)
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TagDetail(APIView):
