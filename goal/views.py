@@ -427,7 +427,7 @@ class ImpossibleDatesOfGoal(APIView):
             )
 
         date_string = request.data.get("date")
-        print("request", request.data)
+        print("request__", request.data)
         if date_string is None:
             raise ParseError("Missing 'date' parameter in the request body.")
 
