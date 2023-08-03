@@ -317,7 +317,7 @@ class GoalDetail(APIView):
                     impossible_dates_list = request.data.get("impossible_dates", None)
                     goal.update_at = request.data.get("update_at", None)
                     if impossible_dates_list is not None:
-                        ImpossibleDates.objects.delete(goal=goal)
+                        ImpossibleDates.objects.filter(goal=goal).delete()
                         for impossible_date in impossible_dates_list:
                             try:
                                 date = datetime.strptime(
