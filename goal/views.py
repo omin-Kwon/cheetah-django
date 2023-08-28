@@ -473,6 +473,8 @@ class GoalHistory(APIView):
             dailyHourOfGoals = dailyHourOfGoals.filter(
                 (Q(date__gte=first_day) & Q(date__lte=last_day))
             )
+        else:
+            dailyHourOfGoals = DailyHourOfGoals.objects.filter(user=request.user) # 전체 history
         serializer = DailyHourOfGoalsSerializer(dailyHourOfGoals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
