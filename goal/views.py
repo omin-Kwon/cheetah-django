@@ -312,7 +312,7 @@ class GoalDetail(APIView):
                         float(request.data.get("residual_time", None)), 2
                     )
                     goal.progress_rate = request.data.get("progress_rate", None)
-                    goal.is_completed = request.data.get("is_completed", None)
+                    goal.is_completed = request.data.get("is_completed", False)
                     if goal.progress_rate == 100:
                         goal.is_completed = True
                     impossible_dates_list = request.data.get("impossible_dates", None)
@@ -476,7 +476,9 @@ class GoalHistory(APIView):
                 (Q(date__gte=first_day) & Q(date__lte=last_day))
             )
         else:
-            dailyHourOfGoals = DailyHourOfGoals.objects.filter(user=request.user) # 전체 history
+            dailyHourOfGoals = DailyHourOfGoals.objects.filter(
+                user=request.user
+            )  # 전체 history
         serializer = DailyHourOfGoalsSerializer(dailyHourOfGoals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
