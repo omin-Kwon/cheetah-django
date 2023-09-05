@@ -212,6 +212,7 @@ class GoalDetail(APIView):
             )
         try:
             goal = Goal.objects.get(id=goal_id)
+            print(goal_id, goal)
         except ObjectDoesNotExist:
             raise NotFound("Goal not found.")
 
@@ -316,8 +317,9 @@ class GoalDetail(APIView):
                         goal.is_completed = True
                     impossible_dates_list = request.data.get("impossible_dates", None)
                     goal.update_at = request.data.get("update_at", None)
+                    print(impossible_dates_list)
                     if impossible_dates_list is not None:
-                        ImpossibleDates.objects.delete(goal=goal)
+                        ImpossibleDates.objects.filter(goal=goal).delete()
                         for impossible_date in impossible_dates_list:
                             try:
                                 date = datetime.strptime(
@@ -336,7 +338,7 @@ class GoalDetail(APIView):
             except ObjectDoesNotExist:
                 raise NotFound("Tag not found.")
 
-        serializer = GoalSerializer(goal)
+        serializer = GoalwithTodoSerializer(goal)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, goal_id):
