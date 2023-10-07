@@ -41,6 +41,7 @@ class GoalList(APIView):
             )
         date_string = request.query_params.get("date", None)  # yyyy-mm-dd
         month_string = request.query_params.get("month", None)  # yyyy-mm
+        selected_tag = request.query_params.get("tag_id", None)  # selected_tag (id)
         try:
             if date_string:
                 date = datetime.strptime(date_string, "%Y-%m-%d").date()
@@ -67,7 +68,10 @@ class GoalList(APIView):
                 "Invalid date format. Date should be in the format 'YYYY-MM-DD'."
             )
         # tag의 is_used가 True인 것만 보내줌
-        goals = Goal.objects.filter(user=request.user)
+        if selected_tag is not None:
+            goals = Goal.objects.filter(user=request.user, tag_id=selected_tag)
+        else:
+            goals = Goal.objects.filter(user=request.user)
 
         if (
             date is not None
@@ -219,6 +223,14 @@ class GoalDetail(APIView):
         daily_check = request.query_params.get("daily_check", None)
         add_calendar = request.query_params.get("add_calendar", None)
         rollback = request.query_params.get("rollback", None)
+        print(
+            "daily_check",
+            daily_check,
+            "add_calendar",
+            add_calendar,
+            "rollback",
+            rollback,
+        )
         # 발바닥 누르는 경우(당일 일정 완료)
         if daily_check is not None:
             try:
@@ -296,10 +308,12 @@ class GoalDetail(APIView):
             goal.save()
         # 상세에서 수정하는 경우
         elif daily_check is None and add_calendar is None and rollback is None:
+            print("여기까지는 옴")
             try:
                 goal.title = request.data.get("title", None)
                 tag_id = request.data.get("tag_id", None)
                 tag = Tag.objects.get(user=request.user, id=tag_id)
+                print("tag Found", tag)
                 goal.tag = tag
                 if goal.is_scheduled:
                     start_at_string = request.data.get("start_at", None)
@@ -319,7 +333,9 @@ class GoalDetail(APIView):
                     goal.update_at = request.data.get("update_at", None)
                     print(impossible_dates_list)
                     if impossible_dates_list is not None:
+                        impossible = ImpossibleDates.objects.filter(goal=goal)
                         ImpossibleDates.objects.filter(goal=goal).delete()
+                        print("i", impossible)
                         for impossible_date in impossible_dates_list:
                             try:
                                 date = datetime.strptime(
@@ -481,5 +497,3 @@ class GoalHistory(APIView):
             )  # 전체 history
         serializer = DailyHourOfGoalsSerializer(dailyHourOfGoals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
