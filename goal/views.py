@@ -362,9 +362,12 @@ class GoalDetail(APIView):
             goal.estimated_time = 0
             goal.save()
             print("goal has saved")
+            serializer = GoalwithTodoSerializer(goal)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
         else:
             goal.delete()
-        return Response("삭제되었습니다.", status=status.HTTP_204_NO_CONTENT)
+            return Response("삭제되었습니다", status=status.HTTP_204_NO_CONTENT)
 
 
 class ImpossibleDatesOfGoal(APIView):
