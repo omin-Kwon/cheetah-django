@@ -308,14 +308,15 @@ class GoalDetail(APIView):
             goal.save()
         # 상세에서 수정하는 경우
         elif daily_check is None and add_calendar is None and rollback is None:
-            print("여기까지는 옴")
+            print("여기까지는 옴", goal.is_scheduled)
             try:
                 goal.title = request.data.get("title", None)
                 tag_id = request.data.get("tag_id", None)
                 tag = Tag.objects.get(user=request.user, id=tag_id)
                 print("tag Found", tag)
                 goal.tag = tag
-                if goal.is_scheduled:
+                if  request.data.get("is_scheduled", False):
+                    print("goal is scheduled")
                     start_at_string = request.data.get("start_at", None)
                     start_at = datetime.strptime(start_at_string, "%Y-%m-%d").date()
                     goal.start_at = start_at
@@ -331,6 +332,8 @@ class GoalDetail(APIView):
                         goal.is_completed = True
                     impossible_dates_list = request.data.get("impossible_dates", None)
                     goal.update_at = request.data.get("update_at", None)
+                    goal.is_scheduled = request.data.get("is_scheduled", False)
+                    goal.estimated_time = request.data.get("estimated_time", None)
                     print(impossible_dates_list)
                     if impossible_dates_list is not None:
                         impossible = ImpossibleDates.objects.filter(goal=goal)
