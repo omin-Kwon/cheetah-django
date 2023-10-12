@@ -39,7 +39,7 @@ class TagList(APIView):
 
         tag = Tag.objects.create(title=title, color=color, is_used=is_used, user=user)
         serializer = TagSerializer(tag)
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TagDetail(APIView):
@@ -64,5 +64,7 @@ class TagDetail(APIView):
         if not request.user.is_authenticated:
             return Response("로그인이 필요합니다.", status=status.HTTP_401_UNAUTHORIZED)
         tag = Tag.objects.get(id=tag_id)
+        # 연관된 goal 까지 같이 삭제한다.
+        tag.goal_set.all().delete()
         tag.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
