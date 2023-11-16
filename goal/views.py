@@ -315,7 +315,7 @@ class GoalDetail(APIView):
                 tag = Tag.objects.get(user=request.user, id=tag_id)
                 print("tag Found", tag)
                 goal.tag = tag
-                if  request.data.get("is_scheduled", False):
+                if request.data.get("is_scheduled", False):
                     print("goal is scheduled")
                     start_at_string = request.data.get("start_at", None)
                     start_at = datetime.strptime(start_at_string, "%Y-%m-%d").date()
@@ -376,6 +376,7 @@ class GoalDetail(APIView):
             goal.progress_rate = 0
             goal.start_at = None
             goal.finish_at = None
+            goal.update_at = None
             goal.cumulative_time = 0
             goal.residual_time = 0
             goal.estimated_time = 0
