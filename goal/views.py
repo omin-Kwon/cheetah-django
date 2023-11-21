@@ -158,9 +158,9 @@ class GoalList(APIView):
                             )
                         ImpossibleDates.objects.create(goal=goal, date=date)
                         print("impossible date 생성 완료")
-                todo_list = request.data.get("todo_list", None)
-                if todo_list is not None:
-                    for todo in todo_list:
+                todo_set = request.data.get("todo_set", None)
+                if todo_set is not None:
+                    for todo in todo_set:
                         Todo.objects.create(
                             goal=goal,
                             title=todo["title"],
@@ -174,9 +174,9 @@ class GoalList(APIView):
                     title=title,
                     is_scheduled=False,
                 )
-                todo_list = request.data.get("todo_list", None)
-                if todo_list is not None:
-                    for todo in todo_list:
+                todo_set = request.data.get("todo_set", None)
+                if todo_set is not None:
+                    for todo in todo_set:
                         Todo.objects.create(
                             goal=goal,
                             title=todo["title"],
@@ -190,7 +190,7 @@ class GoalList(APIView):
         except Exception as e:
             raise ParseError(str(e))
 
-        serializer = GoalSerializer(goal)
+        serializer = GoalwithTodoSerializer(goal)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
