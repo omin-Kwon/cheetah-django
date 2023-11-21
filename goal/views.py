@@ -216,7 +216,7 @@ class GoalDetail(APIView):
             )
         try:
             goal = Goal.objects.get(id=goal_id)
-            print(goal_id, goal)
+            print(goal_id, goal.cumulative_time)
         except ObjectDoesNotExist:
             raise NotFound("Goal not found.")
 
@@ -243,6 +243,8 @@ class GoalDetail(APIView):
                 )
 
                 goal.prev_cumulative_time = goal.cumulative_time
+                if goal.cumulative_time == None:
+                    goal.cumulative_time = 0
                 goal.cumulative_time = goal.cumulative_time + request.data.get(
                     "daily_time"
                 )
