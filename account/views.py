@@ -33,6 +33,7 @@ def set_token_on_response_cookie(user: User, autologin=False) -> Response:
     user_profile = UserProfile.objects.get(user=user)
     user_profile_serializer = UserProfileSerializer(user_profile)
     res = Response(user_profile_serializer.data, status=status.HTTP_201_CREATED)
+    print(user_profile_serializer.data)
     res.set_cookie("refresh_token", value=str(token))
     res.set_cookie("access_token", value=str(token.access_token))
     return res
@@ -89,7 +90,7 @@ class Signup(APIView):  # 회원 가입
         # if 'phone_num' not in request.data:
         #     return Response(data={"message": "phone_num이 입력되지 않았습니다."}, status = status.HTTP_400_BAD_REQUEST)
         default_max_speed = 6
-
+        print(request.data)
         nickname = request.data.get("nickname")
         phone_num = request.data.get("phone_num")
         if "max_speed" in request.data:
@@ -115,7 +116,36 @@ class Signup(APIView):  # 회원 가입
 
         return set_token_on_response_cookie(user)
 
+class Signin(APIView):  # 회원가입
+    def get(self, request):
+        print(request.user)
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Authentication credentials not provided"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+        user = User.objects.get(
+            username=request.user,
+        )
+        user_profile = UserProfile.objects.get(user=user)
+        user_profile_serializer = UserProfileSerializer(user_profile)
+        res = Response(user_profile_serializer.data, status=status.HTTP_200_OK)
 
+        return res
+    def post(self, request):
+        try:
+            user = User.objects.get(
+                username=request.data["username"],
+            )
+            if not user.check_password(request.data["password"]):
+                raise ValueError("Invalid password")
+            auto_login = request.data["autologin"]
+        except:
+            return Response(
+                {"detail": "아이디 또는 비밀번호를 확인해주세요."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        return set_token_on_response_cookie(user, auto_login)
+    
 class FindId(APIView):  # 아이디 찾기
     def get(self, request):
         phone_num = request.query_params["phone_num"]
@@ -159,20 +189,7 @@ class FindPassword(APIView):  # 비밀번호 찾기
             return Response({"message": "OK"}, status=status.HTTP_200_OK)
 
 
-class Signin(APIView):  # 회원가입
-    def post(self, request):
-        try:
-            user = User.objects.get(
-                username=request.data["username"],
-            )
-            if not user.check_password(request.data["password"]):
-                raise ValueError("Invalid password")
-            auto_login = request.data["autologin"]
-        except:
-            return Response(
-                {"detail": "아이디 또는 비밀번호를 확인해주세요."}, status=status.HTTP_400_BAD_REQUEST
-            )
-        return set_token_on_response_cookie(user, auto_login)
+
 
 
 class Logout(APIView):  # 로그아웃
