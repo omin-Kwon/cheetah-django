@@ -43,6 +43,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -165,7 +167,7 @@ dmypy.json
 cython_debug/
 
 #ncloud 전화번호 인증 관련 키
-#key.py
+key.py
 
 #VAPID Key 관련 키
 #default.json
