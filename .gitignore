@@ -165,7 +165,7 @@ dmypy.json
 cython_debug/
 
 #ncloud 전화번호 인증 관련 키
-#key.py
+key.py
 
 #VAPID Key 관련 키
 #default.json
