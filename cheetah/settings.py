@@ -39,7 +39,9 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app",
     "10.0.2.2",
+    "ec2-54-180-80-174.ap-northeast-2.compute.amazonaws.com",
 ]
+
 
 
 # Application definition
@@ -200,6 +202,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://10.0.2.2:8000",
     "https://port-0-cheetah-django-eg4e2alkmzysff.sel4.cloudtype.app",
     "https://web-cheetah-react-eg4e2alkmzysff.sel4.cloudtype.app",
+    "http://ec2-54-180-80-174.ap-northeast-2.compute.amazonaws.com",
 ]
 
 CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주소들
@@ -208,6 +211,7 @@ CORS_ALLOWED_ORIGINS = [  # (헤더) Access-Control-Allow-Origin 에 담을 주�
     "http://localhost:3000",
     "http://10.0.2.2:8000",
     "https://web-cheetah-react-eg4e2alkmzysff.sel4.cloudtype.app",
+    "http://ec2-54-180-80-174.ap-northeast-2.compute.amazonaws.com",
 ]
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True  # cookie를 주고받으려면 얘를 True로 설정해야 해요.
