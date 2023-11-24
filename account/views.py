@@ -133,6 +133,7 @@ class Signin(APIView):  # 회원가입
 
         return res
     def post(self, request):
+        print("test print")
         try:
             user = User.objects.get(
                 username=request.data["username"],
