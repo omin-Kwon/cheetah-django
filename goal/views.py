@@ -252,7 +252,7 @@ class GoalDetail(APIView):
                 goal.progress_rate = request.data.get("progress_rate", None)
                 if goal.progress_rate == 100:
                     goal.is_completed = True
-                DailyHourOfGoals.objects.create(
+                dailyHourofGoals = DailyHourOfGoals.objects.create(
                     user=request.user,
                     goal=goal,
                     hour=request.data.get("daily_time"),
@@ -263,6 +263,9 @@ class GoalDetail(APIView):
                 raise ParseError(
                     "Invalid request body. Check your data types and keys."
                 )
+            # return with dailyhourofGoals Serializer
+            serializer = DailyHourOfGoalsSerializer(dailyHourofGoals)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         # calendar 추가하는 경우.
         elif add_calendar is not None:
             try:

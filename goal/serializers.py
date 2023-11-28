@@ -46,7 +46,7 @@ class GoalwithDailyHourOfGoalsSerializer(ModelSerializer):
 
     class Meta:
         model = Goal
-        fields = ["id", "title", "progress_rate", "finish_at", "update_at", "tag"]
+        fields = "__all__"
 
 
 class DailyHourOfGoalsSerializer(ModelSerializer):
