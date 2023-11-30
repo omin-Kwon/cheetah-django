@@ -389,7 +389,8 @@ class GoalDetail(APIView):
 
         else:
             goal.delete()
-            return Response("삭제되었습니다", status=status.HTTP_204_NO_CONTENT)
+            print("delete succeeded")
+            return Response("삭제되었습니다", status=status.HTTP_200_OK)
 
 
 class ImpossibleDatesOfGoal(APIView):
