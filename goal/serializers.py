@@ -43,6 +43,8 @@ class GoalwithTodoSerializer(ModelSerializer):
 
 class GoalwithDailyHourOfGoalsSerializer(ModelSerializer):
     tag = TagSerializer(many=False, read_only=True)
+    todo_set = TodoSerializer(many=True, read_only=True)
+    impossibledates_set = ImpossibleDatesSerializer(many=True, read_only=True)
 
     class Meta:
         model = Goal
