@@ -98,11 +98,11 @@ class Signup(APIView):  # 회원 가입
         else:
             max_speed = default_max_speed
 
-        # if UserProfile.objects.filter(phone_num=phone_num).exists():
-        #     return Response(
-        #         {"detail": "해당 전화번호로 가입한 계정이 이미 존재합니다."},
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
+        if UserProfile.objects.filter(phone_num=phone_num).exists():
+            return Response(
+                {"detail": "해당 전화번호로 가입한 계정이 이미 존재합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user_serializer = UserSerializer(data=request.data)
         if user_serializer.is_valid(raise_exception=True):
